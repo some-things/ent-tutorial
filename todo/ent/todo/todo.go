@@ -4,6 +4,8 @@ package todo
 
 import (
 	"fmt"
+	"io"
+	"strconv"
 	"time"
 )
 
@@ -78,13 +80,13 @@ var (
 // Status defines the type for the "status" enum field.
 type Status string
 
-// StatusInProgress is the default value of the Status enum.
-const DefaultStatus = StatusInProgress
+// StatusIN_PROGRESS is the default value of the Status enum.
+const DefaultStatus = StatusIN_PROGRESS
 
 // Status values.
 const (
-	StatusInProgress Status = "in_progress"
-	StatusCompleted  Status = "completed"
+	StatusIN_PROGRESS Status = "IN_PROGRESS"
+	StatusCOMPLETED   Status = "COMPLETED"
 )
 
 func (s Status) String() string {
@@ -94,9 +96,27 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusInProgress, StatusCompleted:
+	case StatusIN_PROGRESS, StatusCOMPLETED:
 		return nil
 	default:
 		return fmt.Errorf("todo: invalid enum value for status field: %q", s)
 	}
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (s Status) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(s.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (s *Status) UnmarshalGQL(val interface{}) error {
+	str, ok := val.(string)
+	if !ok {
+		return fmt.Errorf("enum %T must be a string", val)
+	}
+	*s = Status(str)
+	if err := StatusValidator(*s); err != nil {
+		return fmt.Errorf("%s is not a valid Status", str)
+	}
+	return nil
 }
