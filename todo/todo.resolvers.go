@@ -18,8 +18,8 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*ent
 		Save(ctx)
 }
 
-func (r *queryResolver) Todos(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.TodoOrder) (*ent.TodoConnection, error) {
-	return r.client.Debug().Todo.Query().Paginate(ctx, after, first, before, last, ent.WithTodoOrder(orderBy))
+func (r *queryResolver) Todos(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.TodoOrder, where *ent.TodoWhereInput) (*ent.TodoConnection, error) {
+	return r.client.Debug().Todo.Query().Paginate(ctx, after, first, before, last, ent.WithTodoOrder(orderBy), ent.WithTodoFilter(where.Filter))
 }
 
 func (r *queryResolver) Node(ctx context.Context, id int) (ent.Noder, error) {
@@ -28,6 +28,19 @@ func (r *queryResolver) Node(ctx context.Context, id int) (ent.Noder, error) {
 
 func (r *queryResolver) Nodes(ctx context.Context, ids []int) ([]ent.Noder, error) {
 	return r.client.Noders(ctx, ids)
+}
+
+func (r *todoWhereInputResolver) IsCompleted(ctx context.Context, obj *ent.TodoWhereInput, data *bool) error {
+	if obj == nil || data == nil {
+		return nil
+	}
+	if *data {
+		// AddPredicates is not implemented yet
+		// obj.AddPredicates(todo.StatusEQ(todo.StatusCompleted))
+	} else {
+		// obj.AddPredicates(todo.StatusNEQ(todo.StatusCompleted))
+	}
+	return nil
 }
 
 // Mutation returns MutationResolver implementation.

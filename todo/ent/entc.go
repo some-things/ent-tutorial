@@ -12,7 +12,14 @@ import (
 )
 
 func main() {
-	ex, err := entgql.NewExtension()
+	ex, err := entgql.NewExtension(
+		// enables filter generation
+		entgql.WithWhereFilters(true),
+		// configures the path to the gqlgen config file
+		entgql.WithConfigPath("../gqlgen.yml"),
+		// configures a path to a new or existing GraphQL schema to write the generated filters to
+		entgql.WithSchemaPath("../ent.graphql"),
+	)
 	if err != nil {
 		log.Fatalf("creating entgql extension: %v", err)
 	}
