@@ -1,0 +1,47 @@
+{{ range $n := $.Nodes }}
+    {{ $input := print "Create" $n.Name "Input" }}
+    // {{ $input }} represents a mutation input for creating {{ plural $n.Name | lower }}.
+    type {{ $input }} struct {
+        {{- range $f := $n.Fields }}
+            {{- if not $f.IsEdgeField }}
+                {{ $f.StructField }} {{ if and (or $f.Optional $f.Default) (not $f.Type.RType.IsPtr) }}*{{ end }}{{ $f.Type }}
+            {{- end }}
+        {{- end }}
+        {{- range $e := $n.Edges }}
+            {{- if $e.Unique }}
+                {{- $structField := print (pascal $e.Name) "ID" }}
+                {{ $structField }} {{ if $e.Optional }}*{{ end }}{{ $e.Type.ID.Type }}
+            {{- else }}
+                {{- $structField := print (singular $e.Name | pascal) "IDs" }}
+                {{ $structField }} []{{ $e.Type.ID.Type }}
+            {{- end }}
+        {{- end }}
+    }
+
+    {{/* Additional methods go here.  */}}
+
+    {{ $input = print "Update" $n.Name "Input" }}
+    // {{ $input }} represents a mutation input for updating {{ plural $n.Name | lower }}.
+    type {{ $input }} struct {
+        {{- range $f := $n.MutableFields }}
+            {{- if not $f.IsEdgeField }}
+                {{ $f.StructField }} {{ if not $f.Type.RType.IsPtr }}*{{ end }}{{ $f.Type }}
+                {{- if $f.Optional }}
+                    {{ print "Clear" $f.StructField }} bool
+                {{- end }}
+            {{- end }}
+        {{- end }}
+        {{- range $e := $n.Edges }}
+            {{- if $e.Unique }}
+                {{- $structField := print (pascal $e.Name) "ID" }}
+                {{ $structField }} *{{ $e.Type.ID.Type }}
+                {{ $e.MutationClear }} bool
+            {{- else }}
+                {{ $e.MutationAdd }} []{{ $e.Type.ID.Type }}
+                {{ $e.MutationRemove }} []{{ $e.Type.ID.Type }}
+            {{- end }}
+        {{- end }}
+    }
+
+    {{/* Additional methods go here.  */}}
+{{ end }}
