@@ -17,5 +17,17 @@ func (t *TodoQuery) CollectFields(ctx context.Context, satisfies ...string) *Tod
 }
 
 func (t *TodoQuery) collectField(ctx *graphql.OperationContext, field graphql.CollectedField, satisfies ...string) *TodoQuery {
+	for _, field := range graphql.CollectFields(ctx, field.Selections, satisfies) {
+		switch field.Name {
+		case "children":
+			t = t.WithChildren(func(query *TodoQuery) {
+				query.collectField(ctx, field)
+			})
+		case "parent":
+			t = t.WithParent(func(query *TodoQuery) {
+				query.collectField(ctx, field)
+			})
+		}
+	}
 	return t
 }

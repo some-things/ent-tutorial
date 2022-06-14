@@ -18,7 +18,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*ent
 }
 
 func (r *queryResolver) Todos(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.TodoOrder) (*ent.TodoConnection, error) {
-	return r.client.Todo.Query().Paginate(ctx, after, first, before, last, ent.WithTodoOrder(orderBy))
+	return r.client.Debug().Todo.Query().Paginate(ctx, after, first, before, last, ent.WithTodoOrder(orderBy))
 }
 
 func (r *queryResolver) Node(ctx context.Context, id int) (ent.Noder, error) {

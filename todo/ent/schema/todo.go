@@ -31,8 +31,9 @@ func (Todo) Fields() []ent.Field {
 func (Todo) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("parent", Todo.Type).
+			Annotations(entgql.Bind()).
 			Unique().
-			From("children"),
+			From("children").
+			Annotations(entgql.Bind()),
 	}
-
 }
