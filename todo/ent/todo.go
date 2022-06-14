@@ -39,6 +39,8 @@ type TodoEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
+	// totalCount holds the count of the edges above.
+	totalCount [2]*int
 }
 
 // ChildrenOrErr returns the Children value or an error if the edge
@@ -166,14 +168,17 @@ func (t *Todo) Unwrap() *Todo {
 func (t *Todo) String() string {
 	var builder strings.Builder
 	builder.WriteString("Todo(")
-	builder.WriteString(fmt.Sprintf("id=%v", t.ID))
-	builder.WriteString(", text=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
+	builder.WriteString("text=")
 	builder.WriteString(t.Text)
-	builder.WriteString(", created_at=")
+	builder.WriteString(", ")
+	builder.WriteString("created_at=")
 	builder.WriteString(t.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", status=")
+	builder.WriteString(", ")
+	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", t.Status))
-	builder.WriteString(", priority=")
+	builder.WriteString(", ")
+	builder.WriteString("priority=")
 	builder.WriteString(fmt.Sprintf("%v", t.Priority))
 	builder.WriteByte(')')
 	return builder.String()

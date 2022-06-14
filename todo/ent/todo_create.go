@@ -142,9 +142,15 @@ func (tc *TodoCreate) Save(ctx context.Context) (*Todo, error) {
 			}
 			mut = tc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, tc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, tc.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Todo)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from TodoMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }
@@ -353,11 +359,11 @@ func (tcb *TodoCreateBulk) Save(ctx context.Context) ([]*Todo, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				mutation.done = true
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.done = true
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
