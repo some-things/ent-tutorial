@@ -9,7 +9,8 @@ import (
 )
 
 func (r *mutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*ent.Todo, error) {
-	return r.client.Todo.Create().
+	client := ent.FromContext(ctx)
+	return client.Todo.Create().
 		SetText(todo.Text).
 		SetStatus(todo.Status).
 		SetNillablePriority(todo.Priority). // Set the "priority" field if provided.
