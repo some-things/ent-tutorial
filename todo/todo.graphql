@@ -8,8 +8,12 @@ enum Status {
   COMPLETED
 }
 
+interface Node {
+  id: ID!
+}
+
 # Define an object type and map it later to the generated Ent model
-type Todo {
+type Todo implements Node {
   id: ID!
   createdAt: Time
   status: Status!
@@ -36,4 +40,6 @@ type Mutation {
 # Define a query for getting all Todos
 type Query {
   todos: [Todo!]
+  node(id: ID!): Node
+  nodes(ids: [ID!]!): [Node]!
 }

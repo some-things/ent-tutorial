@@ -21,6 +21,14 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*ent.Todo, error) {
 	return r.client.Todo.Query().All(ctx)
 }
 
+func (r *queryResolver) Node(ctx context.Context, id int) (ent.Noder, error) {
+	return r.client.Noder(ctx, id)
+}
+
+func (r *queryResolver) Nodes(ctx context.Context, ids []int) ([]ent.Noder, error) {
+	return r.client.Noders(ctx, ids)
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 

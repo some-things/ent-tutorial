@@ -21,7 +21,9 @@ models:
   ID:
     model:
       - github.com/99designs/gqlgen/graphql.IntID
-
+  Node:
+    model:
+      - todo/ent.Noder
   # Map the Status type that was defined in the schema
   Status:
     model:
