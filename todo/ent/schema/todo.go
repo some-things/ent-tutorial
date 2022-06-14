@@ -3,6 +3,7 @@ package schema
 import (
 	"time"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -16,11 +17,13 @@ type Todo struct {
 // Fields of the Todo.
 func (Todo) Fields() []ent.Field {
 	return []ent.Field{
-		field.Text("text").NotEmpty(),
-		field.Time("created_at").Default(time.Now).Immutable(),
+		// Ordering can be defined on any comparable field of ent by annotating it with entgql.Annotation
+		// Note that the given OrderField name must match its enum value in GraphQL schema
+		field.Text("text").NotEmpty().Annotations(entgql.OrderField("TEXT")),
+		field.Time("created_at").Default(time.Now).Immutable().Annotations(entgql.OrderField("CREATED_AT")),
 		// values use caps to match enum in gql schema
-		field.Enum("status").Values("IN_PROGRESS", "COMPLETED").Default("IN_PROGRESS"),
-		field.Int("priority").Default(0),
+		field.Enum("status").NamedValues("InProgress", "IN_PROGRESS", "Completed", "COMPLETED").Default("IN_PROGRESS").Annotations(entgql.OrderField("STATUS")),
+		field.Int("priority").Default(0).Annotations(entgql.OrderField("PRIORITY")),
 	}
 }
 

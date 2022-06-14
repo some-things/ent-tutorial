@@ -1,3 +1,45 @@
+# Define a Relay Cursor type:
+# https://relay.dev/graphql/connections.htm#sec-Cursor
+scalar Cursor
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: Cursor
+  endCursor: Cursor
+}
+
+type TodoConnection {
+  totalCount: Int!
+  pageInfo: PageInfo!
+  edges: [TodoEdge]
+}
+
+type TodoEdge {
+  node: Todo
+  cursor: Cursor!
+}
+
+# These enums are matched to the entgql annotations in ent/schema
+# Note that the naming must take the form of <T>OrderField / <T>Order for autobinding to the generated ent types
+# Alternatively @goModel directive can be used for manual type binding
+enum TodoOrderField {
+  CREATED_AT
+  PRIORITY
+  STATUS
+  TEXT
+}
+
+enum OrderDirection {
+  ASC
+  DESC
+}
+
+input TodoOrder {
+  direction: OrderDirection!
+  field: TodoOrderField
+}
+
 # Maps a Time GraphQL scalar to a Go time.Time struct
 scalar Time
 
@@ -39,7 +81,13 @@ type Mutation {
 
 # Define a query for getting all Todos
 type Query {
-  todos: [Todo!]
+  todos(
+    after: Cursor
+    first: Int
+    before: Cursor
+    last: Int
+    orderBy: TodoOrder
+  ): TodoConnection!
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
 }

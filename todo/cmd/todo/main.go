@@ -32,7 +32,7 @@ func main() {
 	srv := handler.NewDefaultServer(todo.NewSchema(client))
 	http.Handle("/", playground.Handler("Todo", "/query"))
 	http.Handle("/query", srv)
-	log.Println("listening on :8081")
+	log.Println("listening on http://localhost:8081")
 	if err := http.ListenAndServe(":8081", nil); err != nil {
 		log.Fatal("http server terminated due to error:", err)
 	}
