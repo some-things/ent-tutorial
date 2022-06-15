@@ -6,48 +6,27 @@ package todo
 import (
 	"context"
 	"todo/ent"
+	"todo/ent/todo"
 )
 
-func (r *mutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*ent.Todo, error) {
+func (r *mutationResolver) CreateTodo(ctx context.Context, input ent.CreateTodoInput) (*ent.Todo, error) {
+	return ent.FromContext(ctx).Todo.Create().SetInput(input).Save(ctx)
+}
+
+func (r *mutationResolver) UpdateTodo(ctx context.Context, id int, input ent.UpdateTodoInput) (*ent.Todo, error) {
+	return ent.FromContext(ctx).Todo.UpdateOneID(id).SetInput(input).Save(ctx)
+}
+
+func (r *mutationResolver) UpdateTodos(ctx context.Context, ids []int, input ent.UpdateTodoInput) ([]*ent.Todo, error) {
 	client := ent.FromContext(ctx)
-	return client.Todo.Create().
-		SetText(todo.Text).
-		SetStatus(todo.Status).
-		SetNillablePriority(todo.Priority). // Set the "priority" field if provided.
-		SetNillableParentID(todo.Parent).   // Set the "parent_id" field if provided.
-		Save(ctx)
-}
-
-func (r *queryResolver) Todos(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.TodoOrder, where *ent.TodoWhereInput) (*ent.TodoConnection, error) {
-	return r.client.Debug().Todo.Query().Paginate(ctx, after, first, before, last, ent.WithTodoOrder(orderBy), ent.WithTodoFilter(where.Filter))
-}
-
-func (r *queryResolver) Node(ctx context.Context, id int) (ent.Noder, error) {
-	return r.client.Noder(ctx, id)
-}
-
-func (r *queryResolver) Nodes(ctx context.Context, ids []int) ([]ent.Noder, error) {
-	return r.client.Noders(ctx, ids)
-}
-
-func (r *todoWhereInputResolver) IsCompleted(ctx context.Context, obj *ent.TodoWhereInput, data *bool) error {
-	if obj == nil || data == nil {
-		return nil
+	if err := client.Todo.Update().Where(todo.IDIn(ids...)).SetInput(input).Exec(ctx); err != nil {
+		// return no todos and error if there is an error updating the todos
+		return nil, err
 	}
-	if *data {
-		// AddPredicates is not implemented yet
-		// obj.AddPredicates(todo.StatusEQ(todo.StatusCompleted))
-	} else {
-		// obj.AddPredicates(todo.StatusNEQ(todo.StatusCompleted))
-	}
-	return nil
+	return client.Todo.Query().Where(todo.IDIn(ids...)).All(ctx)
 }
 
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
-// Query returns QueryResolver implementation.
-func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
-
 type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }

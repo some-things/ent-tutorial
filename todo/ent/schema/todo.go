@@ -5,6 +5,7 @@ import (
 
 	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
@@ -22,7 +23,15 @@ func (Todo) Fields() []ent.Field {
 		field.Text("text").NotEmpty().Annotations(entgql.OrderField("TEXT")),
 		field.Time("created_at").Default(time.Now).Immutable().Annotations(entgql.OrderField("CREATED_AT")),
 		// values use caps to match enum in gql schema
-		field.Enum("status").NamedValues("InProgress", "IN_PROGRESS", "Completed", "COMPLETED").Default("IN_PROGRESS").Annotations(entgql.OrderField("STATUS")),
+		field.Enum("status").
+			NamedValues(
+				"InProgress", "IN_PROGRESS",
+				"Completed", "COMPLETED",
+			).
+			Default("IN_PROGRESS").
+			Annotations(
+				entgql.OrderField("STATUS"),
+			),
 		field.Int("priority").Default(0).Annotations(entgql.OrderField("PRIORITY")),
 	}
 }
@@ -31,9 +40,22 @@ func (Todo) Fields() []ent.Field {
 func (Todo) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("parent", Todo.Type).
-			Annotations(entgql.Bind()).
+			// Annotations(entgql.Bind()).
 			Unique().
 			From("children").
-			Annotations(entgql.Bind()),
+			Annotations(entgql.RelayConnection()),
+		// Annotations(entgql.Bind()),
+	}
+}
+
+// Annotations of the Todo.
+func (Todo) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entgql.RelayConnection(),
+		entgql.QueryField(),
+		entgql.Mutations(
+			entgql.MutationCreate(),
+			entgql.MutationUpdate(),
+		),
 	}
 }
